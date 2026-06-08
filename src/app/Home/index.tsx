@@ -1,4 +1,5 @@
 import React from 'react'
+import { useState } from "react"
 import { View, Image, TouchableOpacity, Text, FlatList } from 'react-native'
 import { styles } from '@/app/Home/styles'
 import { Button } from '@/components/Button'
@@ -15,6 +16,7 @@ const ITEMS = [
 ]
 
 export function Home() {
+  const [filter, setFilter] = useState(FilterStatus.PENDING)
   return (
     <>
       <View style={styles.container}>
@@ -29,7 +31,12 @@ export function Home() {
           <View style={styles.header}>
             {
               FILTER_STATUS.map((status) =>
-                <Filter key={status} status={status} isActive />
+                <Filter
+                  key={status}
+                  status={status}
+                  isActive={filter === status}
+                  onPress={() => setFilter(status)}
+                  />
               )
             }
 
@@ -49,9 +56,9 @@ export function Home() {
                 onRemove={() => console.log("remover item")} />
             )}
             showsVerticalScrollIndicator={false}
-            ItemSeparatorComponent={() => <View style={styles.separatorList}/>}
+            ItemSeparatorComponent={() => <View style={styles.separatorList} />}
             contentContainerStyle={styles.listConatiner}
-            ListEmptyComponent={() => <Text style={styles.empty}>Nenhum Item aqui</Text>} 
+            ListEmptyComponent={() => <Text style={styles.empty}>Nenhum Item aqui</Text>}
           />
         </View>
       </View>
