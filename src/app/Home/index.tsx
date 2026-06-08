@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState } from "react"
-import { View, Image, TouchableOpacity, Text, FlatList } from 'react-native'
+import { View, Image, TouchableOpacity, Text, FlatList, Alert } from 'react-native'
 import { styles } from '@/app/Home/styles'
 import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
@@ -9,22 +9,37 @@ import { FilterStatus } from '@/shared-types/FilterStatus'
 import { Item } from '@/components/Item'
 
 const FILTER_STATUS: FilterStatus[] = [FilterStatus.DONE, FilterStatus.PENDING]
-const ITEMS = [
-  { id: '1', status: FilterStatus.DONE, description: "1 pacote de café" },
-  { id: '2', status: FilterStatus.PENDING, description: "3 pacotes de macarrão" },
-  { id: '3', status: FilterStatus.PENDING, description: "3 tomates" },
-]
+
 
 export function Home() {
   const [filter, setFilter] = useState(FilterStatus.PENDING)
+  const [description, setDescription] = useState("")
+  const [items, setItems] = useState<any>([])
+
+  function handleItems(){
+    if(!description.trim()){
+      return Alert.alert("Adicionar", "Informe a descrição para adicionar.")
+    }
+
+    const newItem = {
+      id: Math.random().toString(36).substring(2),
+      description,
+      status: FilterStatus.PENDING
+    }
+
+    setItems([newItem])
+
+  }
+
+
   return (
     <>
       <View style={styles.container}>
         <Image source={require("@/app/assets/logo.png")} style={styles.logo}></Image>
 
         <View style={styles.form}>
-          <Input placeholder='O que voce precisa comprar?' />
-          <Button title="Adicionar" />
+          <Input placeholder='O que voce precisa comprar?' onChangeText={setDescription} />
+          <Button title="Adicionar" onPress={handleItems}/>
         </View>
 
         <View style={styles.content}>
@@ -47,8 +62,8 @@ export function Home() {
 
 
           <FlatList
-            data={ITEMS}
-            keyExtractor={(item) => item.id}
+            data={items}
+            keyExtractor={(item) => item}
             renderItem={({ item }) => (
               <Item
                 data={item}
