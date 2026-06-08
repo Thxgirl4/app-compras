@@ -5,6 +5,7 @@ import { Button } from '@/components/Button'
 import { Input } from '@/components/Input'
 import { Filter } from '@/components/Filter'
 import { FilterStatus } from '@/shared-types/FilterStatus'
+import { Item } from '@/components/Item'
 
 const FILTER_STATUS: FilterStatus[] = [FilterStatus.DONE, FilterStatus.PENDING]
 
@@ -31,6 +32,11 @@ export function Home() {
               <Text style={styles.clearText}> Limpar</Text>
             </TouchableOpacity>
           </View>
+
+          <Item 
+            onStatus={() => console.log("mudar status")}
+            onRemove={() => console.log("remover item")}
+            data={{status: FilterStatus.DONE, description: "Café"}}/>
         </View>
       </View>
     </>
