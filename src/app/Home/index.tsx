@@ -29,12 +29,16 @@ export function Home() {
     }
 
     await itemsStorage.add(newItem)
-    await getItems()
+    await getItemsByStatus()
+
+    Alert.alert("Adicionado", `Adicionado ${description}`)
+    setFilter(FilterStatus.PENDING)
+    setDescription("")
   }
 
-  async function getItems(){
+  async function getItemsByStatus(){
     try{
-      const res = await itemsStorage.get()
+      const res = await itemsStorage.getByStatus(filter)
       setItems(res)
     } catch(error){
       console.log(error)
@@ -42,9 +46,39 @@ export function Home() {
     }
   }
 
+  async function handledRemove(id: string){
+    try{
+      await itemsStorage.remove(id)
+      await getItemsByStatus()
+      console.log(`Removido item id ${id}`)
+
+    }catch(error){
+      console.log(error)
+      Alert.alert("Remover", "Não foi possível remover.")
+    }
+  }
+
+  function handleClear(){
+    Alert.alert("Limpar", "Deseja remover todos?", [
+      {text: "Não", style: "cancel"},
+      {text: "Sim", onPress: () => onClear()}
+    ])
+  }
+
+  async function onClear(){
+    try{
+      await itemsStorage.clear()
+      setItems([])
+
+    }catch(error){
+      console.log(error)
+      Alert.alert("Erro", "Não foi possivel remover todos os itens.")
+    }
+  }
+
   useEffect(() => {
-    getItems()
-  }, [])
+    getItemsByStatus()
+  }, [filter])
 
   return (
     <>
@@ -52,7 +86,7 @@ export function Home() {
         <Image source={require("@/app/assets/logo.png")} style={styles.logo}></Image>
 
         <View style={styles.form}>
-          <Input placeholder='O que voce precisa comprar?' onChangeText={setDescription} />
+          <Input placeholder='O que voce precisa comprar?' onChangeText={setDescription} value={description} />
           <Button title="Adicionar" onPress={handleItems}/>
         </View>
 
@@ -69,7 +103,7 @@ export function Home() {
               )
             }
 
-            <TouchableOpacity style={styles.clearButton}>
+            <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
               <Text style={styles.clearText}> Limpar</Text>
             </TouchableOpacity>
           </View>
@@ -82,7 +116,7 @@ export function Home() {
               <Item
                 data={item}
                 onStatus={() => console.log("mudar status")}
-                onRemove={() => console.log("remover item")} />
+                onRemove={() => handledRemove(item.id)} />
             )}
             showsVerticalScrollIndicator={false}
             ItemSeparatorComponent={() => <View style={styles.separatorList} />}
