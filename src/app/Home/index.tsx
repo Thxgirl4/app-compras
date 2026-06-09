@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from "react"
 import { View, Image, TouchableOpacity, Text, FlatList, Alert } from 'react-native'
 import { styles } from '@/app/Home/styles'
@@ -7,6 +7,7 @@ import { Input } from '@/components/Input'
 import { Filter } from '@/components/Filter'
 import { FilterStatus } from '@/shared-types/FilterStatus'
 import { Item } from '@/components/Item'
+import { ItemStorage, itemsStorage } from '@/storage/itemStorage'
 
 const FILTER_STATUS: FilterStatus[] = [FilterStatus.DONE, FilterStatus.PENDING]
 
@@ -14,9 +15,9 @@ const FILTER_STATUS: FilterStatus[] = [FilterStatus.DONE, FilterStatus.PENDING]
 export function Home() {
   const [filter, setFilter] = useState(FilterStatus.PENDING)
   const [description, setDescription] = useState("")
-  const [items, setItems] = useState<any>([])
+  const [items, setItems] = useState<ItemStorage[]>([])
 
-  function handleItems(){
+  async function handleItems(){
     if(!description.trim()){
       return Alert.alert("Adicionar", "Informe a descrição para adicionar.")
     }
@@ -27,10 +28,23 @@ export function Home() {
       status: FilterStatus.PENDING
     }
 
-    setItems([newItem])
-
+    await itemsStorage.add(newItem)
+    await getItems()
   }
 
+  async function getItems(){
+    try{
+      const res = await itemsStorage.get()
+      setItems(res)
+    } catch(error){
+      console.log(error)
+      Alert.alert("Erro", "Não foi possivel filtrar os itens.")
+    }
+  }
+
+  useEffect(() => {
+    getItems()
+  }, [])
 
   return (
     <>
@@ -63,7 +77,7 @@ export function Home() {
 
           <FlatList
             data={items}
-            keyExtractor={(item) => item}
+            keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
               <Item
                 data={item}
